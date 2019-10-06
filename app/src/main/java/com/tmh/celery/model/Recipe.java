@@ -1,24 +1,43 @@
 package com.tmh.celery.model;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.List;
 
 public class Recipe implements Serializable {
+    private String id;
     private String name;
     private String ownerId;
+    private String description;
     private List<String> directions;
     private List<String> ingredients;
     private List<String> ingredientAmounts;
     private List<String> notes;
 
-    public Recipe(String name, String ownerId, List<String> directions, List<String> ingredients, List<String> ingredientAmounts, List<String> notes) {
+    public Recipe(String id, String name, String ownerId, String description, List<String> directions, List<String> ingredients, List<String> ingredientAmounts, List<String> notes) {
+        this.id = id;
         this.name = name;
         this.ownerId = ownerId;
+        this.description = description;
         this.directions = directions;
         this.ingredients = ingredients;
         this.ingredientAmounts = ingredientAmounts;
         this.notes = notes;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getName() {
@@ -72,8 +91,10 @@ public class Recipe implements Serializable {
     @Override
     public String toString() {
         return "Recipe{" +
-                "name='" + name + '\'' +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
                 ", ownerId='" + ownerId + '\'' +
+                ", description='" + description + '\'' +
                 ", directions=" + directions +
                 ", ingredients=" + ingredients +
                 ", ingredientAmounts=" + ingredientAmounts +

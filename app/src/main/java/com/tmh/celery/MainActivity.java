@@ -12,6 +12,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.tmh.celery.fragment.HomeFragment;
+import com.tmh.celery.fragment.NewRecipeFragment;
+import com.tmh.celery.fragment.RecipeDetailFragment;
 import com.tmh.celery.model.Recipe;
 
 import java.util.ArrayList;
@@ -21,6 +23,25 @@ public class MainActivity extends AppCompatActivity {
 
     private final static String TAG = "MAIN";
 
+    private HomeFragment.OnFragmentInteractionListener mOnHomeFragmentInteractionListener = new HomeFragment.OnFragmentInteractionListener() {
+        @Override
+        public void onItemClicked(Recipe recipe) {
+            RecipeDetailFragment recipeDetailFragment = RecipeDetailFragment.newInstance(recipe);
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.rootLayout, recipeDetailFragment)
+                    .commit();
+        }
+        @Override
+        public void onFabClicked() {
+            NewRecipeFragment newRecipeFragment = NewRecipeFragment.newInstance();
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.rootLayout, newRecipeFragment)
+                    .commit();
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,6 +49,13 @@ public class MainActivity extends AppCompatActivity {
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         final List<Recipe> recipes = new ArrayList<>();
+
+        HomeFragment homeFragment = HomeFragment.newInstance(recipes, mOnHomeFragmentInteractionListener);
+
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.rootLayout, homeFragment)
+                .commit();
 
         db.collection("recipes")
                 .get()
@@ -38,8 +66,10 @@ public class MainActivity extends AppCompatActivity {
                             recipes.clear();
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 Recipe recipe = new Recipe(
+                                        document.getId(),
                                         (String) document.get("name"),
                                         (String) document.get("ownerId"),
+                                        (String) document.get("description"),
                                         (List<String>) document.get("directions"),
                                         (List<String>) document.get("ingredients"),
                                         (List<String>) document.get("ingredientAmounts"),
@@ -47,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
                                 );
                                 Log.d(TAG, recipe.toString());
                                 recipes.add(recipe);
-                                HomeFragment homeFragment = HomeFragment.newInstance(recipes);
+                                HomeFragment homeFragment = HomeFragment.newInstance(recipes, mOnHomeFragmentInteractionListener);
 
                                 getSupportFragmentManager()
                                         .beginTransaction()

@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.tmh.celery.R;
 import com.tmh.celery.adapter.AllRecipesAdapter;
 import com.tmh.celery.model.Recipe;
@@ -25,6 +26,20 @@ public class HomeFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
+    private AllRecipesAdapter.OnItemPressedListener mOnAdapterItemPressedListener = new AllRecipesAdapter.OnItemPressedListener() {
+        @Override
+        public void onItemPressed(Recipe recipe) {
+            mListener.onItemClicked(recipe);
+        }
+    };
+
+    private View.OnClickListener onNewRecipeFabClicked = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            mListener.onFabClicked();
+        }
+    };
+
     public HomeFragment() {
         // Required empty public constructor
     }
@@ -34,6 +49,15 @@ public class HomeFragment extends Fragment {
         Bundle args = new Bundle();
         args.putSerializable("RECIPES", (Serializable) recipes);
         fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static HomeFragment newInstance(List<Recipe> recipes, OnFragmentInteractionListener listener) {
+        HomeFragment fragment = new HomeFragment();
+        Bundle args = new Bundle();
+        args.putSerializable("RECIPES", (Serializable) recipes);
+        fragment.setArguments(args);
+        fragment.mListener = listener;
         return fragment;
     }
 
@@ -53,16 +77,19 @@ public class HomeFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
+        FloatingActionButton fabNewRecipe = view.findViewById(R.id.fabNewRecipe);
+        fabNewRecipe.setOnClickListener(onNewRecipeFabClicked);
+
         RecyclerView recyclerAllRecipes = view.findViewById(R.id.recyclerAllRecipes);
-        AllRecipesAdapter adapter = new AllRecipesAdapter(recipes);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity(), RecyclerView.VERTICAL, false);
+        AllRecipesAdapter adapter = new AllRecipesAdapter(recipes, mOnAdapterItemPressedListener);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
         recyclerAllRecipes.setLayoutManager(layoutManager);
         recyclerAllRecipes.setAdapter(adapter);
     }
 
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
+//            mListener.onFragmentInteraction(uri);
         }
     }
 
@@ -80,11 +107,11 @@ public class HomeFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
+//        mListener = null;
     }
 
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+        void onItemClicked(Recipe recipe);
+        void onFabClicked();
     }
 }

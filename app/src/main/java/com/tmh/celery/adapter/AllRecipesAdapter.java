@@ -14,19 +14,25 @@ import java.util.List;
 
 public class AllRecipesAdapter extends RecyclerView.Adapter<AllRecipesAdapter.RecipeViewHolder>{
     private List<Recipe> recipes;
+    private OnItemPressedListener mListener;
 
     public static class RecipeViewHolder extends RecyclerView.ViewHolder {
+        public View itemView;
+        public TextView textId;
         public TextView textName;
         public TextView textAuthor;
         public RecipeViewHolder(View v) {
             super(v);
-            textName = v.findViewById(R.id.textRecipeName);
-            textAuthor = v.findViewById(R.id.textRecipeAuthor);
+            itemView = v;
+            textId = itemView.findViewById(R.id.textRecipeId);
+            textName = itemView.findViewById(R.id.textRecipeName);
+            textAuthor = itemView.findViewById(R.id.textRecipeAuthor);
         }
     }
 
-    public AllRecipesAdapter(List<Recipe> recipes) {
+    public AllRecipesAdapter(List<Recipe> recipes, OnItemPressedListener listener) {
         this.recipes = recipes;
+        this.mListener = listener;
     }
 
     @Override
@@ -38,12 +44,24 @@ public class AllRecipesAdapter extends RecyclerView.Adapter<AllRecipesAdapter.Re
 
     @Override
     public void onBindViewHolder(RecipeViewHolder viewHolder, int position) {
-        viewHolder.textName.setText(recipes.get(position).getName());
-        viewHolder.textAuthor.setText(recipes.get(position).getOwnerId());
+        final Recipe currentRecipe = recipes.get(position);
+        viewHolder.textId.setText(currentRecipe.getId());
+        viewHolder.textName.setText(currentRecipe.getName());
+        viewHolder.textAuthor.setText(currentRecipe.getOwnerId());
+        viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.onItemPressed(currentRecipe);
+            }
+        });
     }
 
     @Override
     public int getItemCount() {
         return recipes.size();
+    }
+
+    public interface OnItemPressedListener {
+        void onItemPressed(Recipe recipe);
     }
 }
