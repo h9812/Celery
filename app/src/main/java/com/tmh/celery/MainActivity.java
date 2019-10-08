@@ -22,14 +22,17 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     private final static String TAG = "MAIN";
+    private final List<Recipe> recipes = new ArrayList<>();
 
     private HomeFragment.OnFragmentInteractionListener mOnHomeFragmentInteractionListener = new HomeFragment.OnFragmentInteractionListener() {
         @Override
         public void onItemClicked(Recipe recipe) {
+            Log.d(TAG, "Clicked " + recipe.toString());
             RecipeDetailFragment recipeDetailFragment = RecipeDetailFragment.newInstance(recipe);
             getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.rootLayout, recipeDetailFragment)
+                    .addToBackStack(null)
                     .commit();
         }
         @Override
@@ -38,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
             getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.rootLayout, newRecipeFragment)
+                    .addToBackStack(null)
                     .commit();
         }
     };
@@ -47,8 +51,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        final List<Recipe> recipes = new ArrayList<>();
 
         HomeFragment homeFragment = HomeFragment.newInstance(recipes, mOnHomeFragmentInteractionListener);
 
@@ -57,6 +59,12 @@ public class MainActivity extends AppCompatActivity {
                 .replace(R.id.rootLayout, homeFragment)
                 .commit();
 
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("recipes")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -75,21 +83,20 @@ public class MainActivity extends AppCompatActivity {
                                         (List<String>) document.get("ingredientAmounts"),
                                         (List<String>) document.get("notes")
                                 );
-                                Log.d(TAG, recipe.toString());
                                 recipes.add(recipe);
-                                HomeFragment homeFragment = HomeFragment.newInstance(recipes, mOnHomeFragmentInteractionListener);
-
-                                getSupportFragmentManager()
-                                        .beginTransaction()
-                                        .replace(R.id.rootLayout, homeFragment)
-                                        .commit();
+                                Log.d(TAG, recipe.toString());
                             }
 
+                            HomeFragment homeFragment = HomeFragment.newInstance(recipes, mOnHomeFragmentInteractionListener);
+
+                            getSupportFragmentManager()
+                                    .beginTransaction()
+                                    .replace(R.id.rootLayout, homeFragment)
+                                    .commit();
                         } else {
                             Log.w(TAG, "Error getting documents.", task.getException());
                         }
                     }
                 });
-
     }
 }

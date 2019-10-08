@@ -5,16 +5,14 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
-import androidx.viewpager.widget.ViewPager;
 
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
-import com.google.android.material.tabs.TabLayout;
 import com.tmh.celery.R;
-import com.tmh.celery.adapter.RecipeDetailPagerAdapter;
 import com.tmh.celery.model.Recipe;
 
 public class RecipeDetailFragment extends Fragment {
@@ -23,14 +21,13 @@ public class RecipeDetailFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
-    private ViewPager viewPager;
-    private TabLayout tabLayout;
-
     public RecipeDetailFragment() {
         // Required empty public constructor
     }
 
     public static RecipeDetailFragment newInstance(Recipe recipe) {
+        Log.d("RecipeDetailFragment", "NewInstance!");
+        Log.d("RecipeDetailFragment", recipe.toString());
         RecipeDetailFragment fragment = new RecipeDetailFragment();
         Bundle args = new Bundle();
         args.putSerializable("RECIPE", recipe);
@@ -54,12 +51,8 @@ public class RecipeDetailFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        tabLayout = view.findViewById(R.id.tabLayout);
-
-        viewPager = view.findViewById(R.id.pagerRecipeDetail);
-        RecipeDetailPagerAdapter adapter = new RecipeDetailPagerAdapter(getActivity().getSupportFragmentManager(), tabLayout.getTabCount(), recipe);
-        viewPager.setAdapter(adapter);
-        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        TextView textRecipeDetail = view.findViewById(R.id.textRecipeDetail);
+        textRecipeDetail.setText(recipe.toString());
     }
 
     public void onButtonPressed(Uri uri) {
@@ -77,6 +70,11 @@ public class RecipeDetailFragment extends Fragment {
 //            throw new RuntimeException(context.toString()
 //                    + " must implement OnFragmentInteractionListener");
 //        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
     }
 
     @Override

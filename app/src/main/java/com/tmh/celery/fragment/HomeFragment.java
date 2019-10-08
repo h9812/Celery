@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,6 +54,7 @@ public class HomeFragment extends Fragment {
     }
 
     public static HomeFragment newInstance(List<Recipe> recipes, OnFragmentInteractionListener listener) {
+        Log.d("Home", "NewInstance!");
         HomeFragment fragment = new HomeFragment();
         Bundle args = new Bundle();
         args.putSerializable("RECIPES", (Serializable) recipes);
