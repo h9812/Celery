@@ -1,7 +1,9 @@
 package com.tmh.celery.model;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Recipe implements Serializable {
     private String id;
@@ -100,5 +102,19 @@ public class Recipe implements Serializable {
                 ", ingredientAmounts=" + ingredientAmounts +
                 ", notes=" + notes +
                 '}';
+    }
+
+    public HashMap<String, Object> getHashMap() {
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("name", name);
+        data.put("ownerId", ownerId);
+        data.put("description", description);
+        data.put("directions", directions);
+        data.put("ingredients", ingredients);
+        data.put("ingredientAmounts", ingredientAmounts);
+        data.put("notes", notes);
+        return data;
+
+
     }
 }

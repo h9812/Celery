@@ -7,7 +7,10 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -17,10 +20,13 @@ import com.tmh.celery.fragment.RecipeDetailFragment;
 import com.tmh.celery.model.Recipe;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
+    private final static String userId = new String("tranminhhieu");
     private final static String TAG = "MAIN";
     private final List<Recipe> recipes = new ArrayList<>();
 
@@ -37,12 +43,34 @@ public class MainActivity extends AppCompatActivity {
         }
         @Override
         public void onFabClicked() {
-            NewRecipeFragment newRecipeFragment = NewRecipeFragment.newInstance();
+            NewRecipeFragment newRecipeFragment = NewRecipeFragment.newInstance(mOnNewRecipeFragmentInteractioListener);
             getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.rootLayout, newRecipeFragment)
                     .addToBackStack(null)
                     .commit();
+        }
+    };
+
+    private NewRecipeFragment.OnFragmentInteractionListener mOnNewRecipeFragmentInteractioListener = new NewRecipeFragment.OnFragmentInteractionListener() {
+        @Override
+        public void onRecipeShared(Recipe recipe) {
+            recipe.setOwnerId(userId);
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            db.collection("recipes")
+                    .add(recipe.getHashMap())
+                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                        @Override
+                        public void onSuccess(DocumentReference documentReference) {
+                            Log.d(TAG, "DocumentSnapshot written with ID: " + documentReference.getId());
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.w(TAG, "Error adding document", e);
+                        }
+                    });
         }
     };
 

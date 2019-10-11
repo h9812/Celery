@@ -6,4 +6,7 @@
     <string name="directions">Directions</string>
     <string name="ingredients">Ingredients</string>
     <string name="introduction">Introduction</string>
+    <string name="edit_hint_ingredient">Ingredient</string>
+    <string name="edit_hint_ingredient_amount">Amount</string>
+    <string name="button_delete">Delete</string>
 </resources>
