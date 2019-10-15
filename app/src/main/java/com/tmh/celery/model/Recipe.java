@@ -3,7 +3,6 @@ package com.tmh.celery.model;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class Recipe implements Serializable {
     private String id;
@@ -14,8 +13,9 @@ public class Recipe implements Serializable {
     private List<String> ingredients;
     private List<String> ingredientAmounts;
     private List<String> notes;
+    private String imageUrl;
 
-    public Recipe(String id, String name, String ownerId, String description, List<String> directions, List<String> ingredients, List<String> ingredientAmounts, List<String> notes) {
+    public Recipe(String id, String name, String ownerId, String description, List<String> directions, List<String> ingredients, List<String> ingredientAmounts, List<String> notes, String imageUrl) {
         this.id = id;
         this.name = name;
         this.ownerId = ownerId;
@@ -24,6 +24,7 @@ public class Recipe implements Serializable {
         this.ingredients = ingredients;
         this.ingredientAmounts = ingredientAmounts;
         this.notes = notes;
+        this.imageUrl = imageUrl;
     }
 
     public String getId() {
@@ -90,6 +91,14 @@ public class Recipe implements Serializable {
         this.notes = notes;
     }
 
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
     @Override
     public String toString() {
         return "Recipe{" +
@@ -101,20 +110,7 @@ public class Recipe implements Serializable {
                 ", ingredients=" + ingredients +
                 ", ingredientAmounts=" + ingredientAmounts +
                 ", notes=" + notes +
+                ", imageUrl='" + imageUrl + '\'' +
                 '}';
-    }
-
-    public HashMap<String, Object> getHashMap() {
-        HashMap<String, Object> data = new HashMap<>();
-        data.put("name", name);
-        data.put("ownerId", ownerId);
-        data.put("description", description);
-        data.put("directions", directions);
-        data.put("ingredients", ingredients);
-        data.put("ingredientAmounts", ingredientAmounts);
-        data.put("notes", notes);
-        return data;
-
-
     }
 }

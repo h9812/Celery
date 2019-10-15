@@ -15,6 +15,33 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <LinearLayout
+                android:id="@+id/linearImagePickerContainer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+                    <ImageView
+                        android:src="@drawable/recipe_default_image"
+                        android:id="@+id/imageView"
+                        android:scaleType="centerCrop"
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp" />
+                    <Button
+                        android:id="@+id/buttonDeleteImage"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Delete" />
+                </FrameLayout>
+                <Button
+                    android:id="@+id/buttonChooseImage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Choose image" />
+            </LinearLayout>
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

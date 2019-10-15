@@ -1,6 +1,11 @@
 package com.tmh.celery.fragment;
 
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -12,21 +17,30 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.tmh.celery.R;
 import com.tmh.celery.model.Recipe;
+import com.tmh.celery.repository.RecipeRepo;
 
+import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class NewRecipeFragment extends Fragment {
 
+    public static final int PICK_IMAGE = 1;
+    private static final CharSequence UPLOADING = "Uploading... Please wait";
+    private static final CharSequence UPLOADED = "Uploaded successfully!";
+
     public interface OnFragmentInteractionListener {
-        void onRecipeShared(Recipe recipe);
+        void onRecipeShared();
     }
 
     // Child views
@@ -37,6 +51,9 @@ public class NewRecipeFragment extends Fragment {
     private Button buttonAddIngredient;
     private Button buttonAddDirection;
     private Button buttonAddNote;
+    private ImageView imageView;
+    private Button buttonChooseImage;
+    private Button buttonDeleteImage;
 
     // Line ids
     private List<Integer> listIngredientLineIds = new ArrayList<>();
@@ -57,7 +74,16 @@ public class NewRecipeFragment extends Fragment {
     private List<String> listDirections = new ArrayList<>();
     private List<String> listNotes = new ArrayList<>();
 
+    // Listeners
     private OnFragmentInteractionListener mListener;
+    private RecipeRepo.OnRecipeUploadedListener onRecipeUploadedListener = new RecipeRepo.OnRecipeUploadedListener() {
+        @Override
+        public void onRecipeUploaded() {
+            Toast toast = Toast.makeText(getActivity(), UPLOADED, Toast.LENGTH_SHORT);
+            toast.show();
+            mListener.onRecipeShared();
+        }
+    };
 
     public NewRecipeFragment() {
         // Required empty public constructor
@@ -82,6 +108,29 @@ public class NewRecipeFragment extends Fragment {
 
     @Override
     public void onViewCreated(final View view, Bundle savedInstanceState) {
+
+        imageView = view.findViewById(R.id.imageView);
+        buttonChooseImage = view.findViewById(R.id.buttonChooseImage);
+        buttonChooseImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(Intent.ACTION_PICK);
+                intent.setType("image/*");
+                String[] mimeTypes = {"image/jpeg", "image/jpg"};
+                intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
+                startActivityForResult(intent, PICK_IMAGE);
+            }
+        });
+
+        buttonDeleteImage = view.findViewById(R.id.buttonDeleteImage);
+        buttonDeleteImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                imageView.setImageDrawable(getResources().getDrawable(R.drawable.recipe_default_image));
+                buttonDeleteImage.setVisibility(View.INVISIBLE);
+            }
+        });
+
         fabShareRecipe = view.findViewById(R.id.fabShareRecipe);
         fabShareRecipe.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -89,6 +138,7 @@ public class NewRecipeFragment extends Fragment {
                 shareRecipe();
             }
         });
+        buttonDeleteImage.setVisibility(View.INVISIBLE);
 
 
         linearIngredientsContainer = view.findViewById(R.id.linearIngredientsContainer);
@@ -127,25 +177,33 @@ public class NewRecipeFragment extends Fragment {
         addNote();
         addNote();
 
-
-
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-//        if (context instanceof OnFragmentInteractionListener) {
-//            mListener = (OnFragmentInteractionListener) context;
-//        } else {
-//            throw new RuntimeException(context.toString()
-//                    + " must implement OnFragmentInteractionListener");
-//        }
+        RecipeRepo.getInstance().addOnRecipeUpdatedListener(onRecipeUploadedListener);
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
+        RecipeRepo.getInstance().removeOnRecipeUploadedListener(onRecipeUploadedListener);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_IMAGE) {
+            if(data != null) {
+                Uri selectedImage = data.getData();
+                imageView.setImageURI(selectedImage);
+                Log.d("DATA", selectedImage.toString());
+                buttonDeleteImage.setVisibility(View.VISIBLE);
+            }
+
+        }
     }
 
     private boolean isInputValid() {
@@ -153,8 +211,12 @@ public class NewRecipeFragment extends Fragment {
     }
 
     private void shareRecipe() {
-//            String recipeId = new String();
-            name = ((EditText) getView().findViewById(R.id.editRecipeName)).getText().toString();
+
+        Toast toast = Toast.makeText(getActivity(), UPLOADING, Toast.LENGTH_LONG);
+        toast.show();
+
+
+        name = ((EditText) getView().findViewById(R.id.editRecipeName)).getText().toString();
         description = ((EditText) getView().findViewById(R.id.editRecipeDescription)).getText().toString();
 
         listIngredients.clear();
@@ -180,17 +242,25 @@ public class NewRecipeFragment extends Fragment {
 
 
         if(isInputValid()) {
-            Recipe newRecipe = new Recipe(
-                    "",
-                    name,
-                    "",
-                    description,
-                    listDirections,
-                    listIngredients,
-                    listIngredientAmounts,
-                    listNotes
-            );
-            mListener.onRecipeShared(newRecipe);
+
+            HashMap<String, Object> data = new HashMap<>();
+            data.put("name", name);
+            data.put("ownerId", "");
+            data.put("description", description);
+            data.put("directions", listDirections);
+            data.put("ingredients", listIngredients);
+            data.put("ingredientAmounts", listIngredientAmounts);
+            data.put("notes", listNotes);
+            data.put("imageUrl", "");
+
+            imageView.setDrawingCacheEnabled(true);
+            imageView.buildDrawingCache();
+            Bitmap bitmap = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            byte[] imageData = baos.toByteArray();
+
+            RecipeRepo.getInstance().uploadRecipe(data, imageData);
         }
     }
 

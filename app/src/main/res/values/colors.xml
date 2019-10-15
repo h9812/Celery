@@ -3,4 +3,5 @@
     <color name="colorPrimary">#007566</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B1B</color>
+    <color name="recipe_name_bg">#BF171717</color>
 </resources>
